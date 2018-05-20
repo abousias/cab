@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using ConsoleAppBase.Attributes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -60,7 +61,7 @@ namespace ConsoleAppBase
         /// <returns>remaining arguments which were not filled in properties.</returns>
         private IEnumerable<string> FillAllArguments(IEnumerable<string> args, Command command)
         {
-            var arguments = Command.GetArgumentProperties(command.GetType()).Select(s => s.Value).ToArray();
+            var arguments = Command.GetArgumentProperties(command.GetType());
             if (!arguments.Any())
             {
                 if (IsOption(args.FirstOrDefault(), command))
@@ -79,9 +80,8 @@ namespace ConsoleAppBase
                     break;
                 }
 
-                var argument = arguments[counter];
-                object propValue = ConvertValueForProperty(argument, value);
-                argument.SetValue(command, propValue);
+                var argument = arguments.ElementAt(counter);
+                argument.Key.SetValue(command, argument.Value, value);
                 counter++;
             }
 
@@ -103,7 +103,7 @@ namespace ConsoleAppBase
 
                 if (matchingOption != null)
                 {
-                    if (matchingOption.PropertyType == typeof(bool))
+                    if (matchingOption.Value.PropertyType == typeof(bool))
                     {
                         matchingOption.SetValue(command, true);
                     }
@@ -120,17 +120,7 @@ namespace ConsoleAppBase
             }
         }
 
-        private object ConvertValueForProperty(PropertyInfo property, string arg)
-        {
-            var propertyType = property.PropertyType;
-
-            if (propertyType.IsEnum)
-                return Enum.Parse(propertyType, arg);
-            else if (IsSimpleType(propertyType))
-                return Convert.ChangeType(arg, propertyType);
-            else
-                return JsonConvert.DeserializeObject(arg, propertyType);
-        }
+        
 
         private bool IsOption(string arg, Command command)
         {
@@ -139,10 +129,10 @@ namespace ConsoleAppBase
             return FindOptionProperty(arg, command) != null;
         }
 
-        private PropertyInfo FindOptionProperty(string arg, Command command)
+        private KeyValuePair<CommandOptionAttribute, PropertyInfo> FindOptionProperty(string arg, Command command)
         {
             var options = Command.GetOptionProperties(command.GetType());
-            return options.FirstOrDefault(o => OptionTemplateContains(o.Key.Template, arg)).Value;
+            return options.FirstOrDefault(o => OptionTemplateContains(o.Key.Template, arg));
         }
 
         private bool OptionTemplateContains(string template, string arg)
@@ -150,21 +140,6 @@ namespace ConsoleAppBase
             return template.Split('|').Contains(arg);
         }
 
-        private bool IsSimpleType(Type type)
-        {
-            return
-                type.IsPrimitive ||
-                new Type[] {
-                    typeof(String),
-                    typeof(Decimal),
-                    typeof(DateTime),
-                    typeof(DateTimeOffset),
-                    typeof(TimeSpan),
-                    typeof(Guid)
-                }.Contains(type) ||
-                Convert.GetTypeCode(type) != TypeCode.Object ||
-                (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) && IsSimpleType(type.GetGenericArguments()[0]))
-                ;
-        }
+        
     }
 }

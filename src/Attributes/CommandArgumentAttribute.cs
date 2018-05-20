@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Reflection;
 
 namespace ConsoleAppBase.Attributes
 {
     /// <summary>
     /// Property attribute to define a command argument.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class CommandArgumentAttribute : Attribute
+    public class CommandArgumentAttribute : PrimitiveValueParameterAttribute
     {
         /// <summary>
         /// Gets the position of the command argument in the argument list.

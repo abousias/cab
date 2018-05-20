@@ -5,8 +5,7 @@ namespace ConsoleAppBase.Attributes
     /// <summary>
     /// Property attribute to define a command option.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class CommandOptionAttribute : Attribute
+    public class CommandOptionAttribute : PrimitiveValueParameterAttribute
     {
         /// <summary>
         /// Gets or sets the templated identifier(s) of the command option.
