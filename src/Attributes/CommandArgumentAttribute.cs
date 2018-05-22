@@ -6,7 +6,7 @@ namespace ConsoleAppBase.Attributes
     /// <summary>
     /// Property attribute to define a command argument.
     /// </summary>
-    public class CommandArgumentAttribute : PrimitiveValueParameterAttribute
+    public class CommandArgumentAttribute : SimpleTypeParameterAttribute
     {
         /// <summary>
         /// Gets the position of the command argument in the argument list.
@@ -35,6 +35,11 @@ namespace ConsoleAppBase.Attributes
         public CommandArgumentAttribute(int position)
         {
             Position = position;
+        }
+
+        public override bool ValidateValue(PropertyInfo property, string value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -88,8 +88,7 @@ namespace ConsoleAppBase
             }
             catch (Exception ex) when (
                 ex is RequiredArgumentException ||
-                ex is NoArgumentsExistException ||
-                ex is System.ComponentModel.DataAnnotations.ValidationException)
+                ex is NoArgumentsExistException)
             {
                 Output.ShowError(ex.Message);
             }

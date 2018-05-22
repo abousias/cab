@@ -1,8 +1,5 @@
 ﻿using ConsoleAppBase.Attributes;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 
@@ -22,8 +19,6 @@ namespace ConsoleAppBase
             var optionOnlyValues = FillAllArguments(args, command);
 
             FillAllOptions(optionOnlyValues, command);
-
-            Validator.ValidateObject(command, new ValidationContext(command), validateAllProperties: true);
         }
 
         /// <summary>
@@ -96,26 +91,26 @@ namespace ConsoleAppBase
         
         private void FillAllOptions(IEnumerable<string> args, Command command)
         {
-            PropertyInfo option = null;
+            CommandOptionAttribute option = null;
             foreach (var arg in args)
             {
                 var matchingOption = FindOptionProperty(arg, command);
 
-                if (matchingOption != null)
+                if (matchingOption.Key != null)
                 {
                     if (matchingOption.Value.PropertyType == typeof(bool))
                     {
-                        matchingOption.SetValue(command, true);
+                        matchingOption.Key.SetValue(command, matchingOption.Value, true.ToString());
                     }
                     else
                     {
-                        option = matchingOption;
+                        option = matchingOption.Key;
                     }
                 }
                 else
                 {
-                    object propValue = ConvertValueForProperty(option, arg);
-                    option.SetValue(command, propValue);
+                    
+                    option.SetValue(command, matchingOption.Value, arg);
                 }
             }
         }
@@ -126,7 +121,7 @@ namespace ConsoleAppBase
         {
             if (string.IsNullOrEmpty(arg)) return false;
 
-            return FindOptionProperty(arg, command) != null;
+            return FindOptionProperty(arg, command).Key != null;
         }
 
         private KeyValuePair<CommandOptionAttribute, PropertyInfo> FindOptionProperty(string arg, Command command)
